@@ -1,0 +1,32 @@
+{
+  "122098392890004279": [
+    {
+      "name": "iPhone 15 Pro",
+      "price": "5,000,000₮",
+      "image": "https://store.storeimages.cdn-apple.com/iphone15pro.jpg",
+      "description": "256GB, Natural Titanium",
+      "category": "phone"
+    },
+    {
+      "name": "Samsung S23",
+      "price": "3,500,000₮",
+      "image": "https://images.samsung.com/s23.jpg",
+      "description": "Android flagship",
+      "category": "phone"
+    },
+    {
+      "name": "AirPods Pro",
+      "price": "800,000₮",
+      "image": "https://store.storeimages.cdn-apple.com/airpodspro.jpg",
+      "description": "Noise cancelling",
+      "category": "accessory"
+    },
+    {
+      "name": "Smart Watch",
+      "price": "600,000₮",
+      "image": "https://example.com/watch.jpg",
+      "description": "Fitness tracking",
+      "category": "wearable"
+    }
+  ]
+}
