@@ -7,27 +7,27 @@ from openai import OpenAI
 
 app = FastAPI()
 
-# 🔐 VERIFY TOKEN (Meta webhook)
+# 🔐 VERIFY TOKEN
 VERIFY_TOKEN = "mytoken123"
 
 # 🔐 OpenAI
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🔐 Page token mapping
+# 🔐 Page Tokens
 PAGE_TOKENS = {
     "1090689544121845": os.getenv("APEXCORE_AI"),
     "122098392890004279": os.getenv("STORE_ONLINE_SHOP")
 }
 
-# 🧠 Барааны мэдээлэл (түр MVP)
-
+# 📦 Load products
 def load_products():
     with open("products.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
 PRODUCTS = load_products()
 
-# 🔍 VERIFY ENDPOINT (Meta шалгах үед)
+
+# 🔍 VERIFY ENDPOINT
 @app.get("/webhook")
 async def verify(request: Request):
     hub_mode = request.query_params.get("hub.mode")
@@ -40,31 +40,43 @@ async def verify(request: Request):
     return PlainTextResponse("error", status_code=403)
 
 
-# 💬 MESSAGE RECEIVE
+# 💬 WEBHOOK
 @app.post("/webhook")
 async def webhook(req: Request):
     data = await req.json()
 
     if "entry" in data:
         for entry in data["entry"]:
-            page_id = entry["id"]  # 🔥 ЯМАР PAGE гэдгийг эндээс авна
+            page_id = entry["id"]
 
             for messaging in entry["messaging"]:
                 sender_id = messaging["sender"]["id"]
 
                 if "message" in messaging:
-                    user_text = messaging["message"].get("text", "")
+                    user_text = messaging["message"].get("text", "").lower()
 
-                    # 🤖 AI + Product reply
+                    product_list = PRODUCTS.get(page_id, [])
+
+                    # 🔍 PRODUCT MATCH
+                    matched = []
+                    for p in product_list:
+                        if p["name"].lower() in user_text:
+                            matched.append(p)
+
+                    # 🟢 Хэрвээ бараа олдвол зураг явуулна
+                    if matched:
+                        for product in matched:
+                            send_product(page_id, sender_id, product)
+                        continue
+
+                    # 🤖 AI reply
                     reply = generate_reply(page_id, user_text)
-
-                    # 📤 Send message
                     send_message(page_id, sender_id, reply)
 
     return "ok"
 
 
-# 🤖 AI + БАРАА ЛОГИК
+# 🤖 AI RESPONSE
 def generate_reply(page_id, user_text):
     try:
         product_list = PRODUCTS.get(page_id, [])
@@ -97,22 +109,53 @@ def generate_reply(page_id, user_text):
 
     except Exception as e:
         print("OPENAI ERROR:", str(e))
-        return "Алдаа гарлаа"
+        return "Уучлаарай, AI хариу өгөхөд алдаа гарлаа."
 
 
-# 📤 MESSAGE SEND
+# 📤 TEXT MESSAGE
 def send_message(page_id, recipient_id, text):
     token = PAGE_TOKENS.get(page_id)
-
-    if not token:
-        print("TOKEN NOT FOUND FOR PAGE:", page_id)
-        return
 
     url = f"https://graph.facebook.com/v18.0/me/messages?access_token={token}"
 
     payload = {
         "recipient": {"id": recipient_id},
         "message": {"text": text}
+    }
+
+    requests.post(url, json=payload)
+
+
+# 🖼️ PRODUCT CARD (Зураг + товч)
+def send_product(page_id, recipient_id, product):
+    token = PAGE_TOKENS.get(page_id)
+
+    url = f"https://graph.facebook.com/v18.0/me/messages?access_token={token}"
+
+    payload = {
+        "recipient": {"id": recipient_id},
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [
+                        {
+                            "title": product["name"],
+                            "image_url": product["image"],
+                            "subtitle": f"{product['price']} - {product['description']}",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "Захиалах",
+                                    "payload": f"ORDER_{product['name']}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
     }
 
     requests.post(url, json=payload)
