@@ -67,6 +67,7 @@ async def webhook(req: Request):
                         reply = response.choices[0].message.content
 
                     except Exception as e:
+                        print("OPENAI ERROR:", str(e))   # 👈 нэм
                         reply = "Уучлаарай, AI хариу өгөхөд алдаа гарлаа."
 
                     send_message(sender_id, reply)
