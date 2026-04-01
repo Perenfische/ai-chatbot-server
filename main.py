@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 import requests
 import os
+import json
 from openai import OpenAI
 
 app = FastAPI()
@@ -19,14 +20,12 @@ PAGE_TOKENS = {
 }
 
 # 🧠 Барааны мэдээлэл (түр MVP)
-PRODUCTS = {
-    "122098392890004279": [
-        {"name": "iPhone 15 Pro", "price": "5,000,000₮"},
-        {"name": "Samsung S23", "price": "3,500,000₮"},
-        {"name": "AirPods Pro", "price": "800,000₮"},
-        {"name": "Smart Watch", "price": "600,000₮"}
-    ]
-}
+
+def load_products():
+    with open("products.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+PRODUCTS = load_products()
 
 # 🔍 VERIFY ENDPOINT (Meta шалгах үед)
 @app.get("/webhook")
@@ -82,12 +81,12 @@ def generate_reply(page_id, user_text):
                 {
                     "role": "system",
                     "content": f"""
-Та Монгол хэл дээр хариулдаг онлайн дэлгүүрийн борлуулалтын assistant.
+Та Монгол хэл дээр хариулдаг онлайн дэлгүүрийн assistant.
 
-Бараанууд:
+Дараах бараанууд байна:
 {product_text}
 
-Хэрэглэгчид тусалж, товч, ойлгомжтой, найрсаг хариул.
+Хэрэглэгчид тусалж, бараа санал болго.
 """
                 },
                 {"role": "user", "content": user_text}
@@ -98,7 +97,7 @@ def generate_reply(page_id, user_text):
 
     except Exception as e:
         print("OPENAI ERROR:", str(e))
-        return "Уучлаарай, AI хариу өгөхөд алдаа гарлаа."
+        return "Алдаа гарлаа
 
 
 # 📤 MESSAGE SEND
