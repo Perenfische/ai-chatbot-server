@@ -58,10 +58,15 @@ async def webhook(req: Request):
                     product_list = PRODUCTS.get(page_id, [])
 
                     # 🔍 PRODUCT MATCH
-                    matched = []
-                    for p in product_list:
-                        if p["name"].lower() in user_text:
-                            matched.append(p)
+                   matched = []
+
+                        for p in product_list:
+                            keywords = p["name"].lower().split()
+
+                            for word in keywords:
+                                if word in user_text:
+                                    matched.append(p)
+                                    break
 
                     # 🟢 Хэрвээ бараа олдвол зураг явуулна
                     if matched:
