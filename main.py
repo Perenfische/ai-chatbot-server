@@ -11,9 +11,9 @@ def home():
     return {"message": "AI chatbot ажиллаж байна"}
 
 @app.get("/webhook")
-def verify(mode: str = None, challenge: str = None, verify_token: str = None):
-    if verify_token == "mytoken123":
-        return challenge
+def verify(hub_mode: str = None, hub_challenge: str = None, hub_verify_token: str = None):
+    if hub_verify_token == "mytoken123":
+        return hub_challenge
     return "error"
 
 @app.post("/webhook")
