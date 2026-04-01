@@ -10,6 +10,12 @@ PAGE_ACCESS_TOKEN = "EAGBiyPUiZClABRDVkcofHw5Ia1IMaLuA9EzsvF8PZBFJRdiAZB1PXzfQXn
 def home():
     return {"message": "AI chatbot ажиллаж байна"}
 
+@app.get("/webhook")
+def verify(mode: str = None, challenge: str = None, verify_token: str = None):
+    if verify_token == "mytoken123":
+        return challenge
+    return "error"
+
 @app.post("/webhook")
 async def webhook(req: Request):
     data = await req.json()
