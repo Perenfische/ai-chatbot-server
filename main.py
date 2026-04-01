@@ -6,23 +6,29 @@ from openai import OpenAI
 
 app = FastAPI()
 
-# 🔐 Facebook page token
-PAGE_ACCESS_TOKEN = "EAGBiyPUiZClABRDVkcofHw5Ia1IMaLuA9EzsvF8PZBFJRdiAZB1PXzfQXnfuhZArYhjr25zL9ok4GvgKpFUbNVSvjBNn2XBWdkY6nPeJ1nMrAUOqvPz8b3j92Bq9cwyeJZBNPB21cRXGCJGWZB4CXUGuROmiaj90RcUOzXgehRRLnFZA4oV0jjb0BLHKlvnCtXVqEjFcwZDZD"
-
-# 🔐 Webhook verify token
+# 🔐 VERIFY TOKEN (Meta webhook)
 VERIFY_TOKEN = "mytoken123"
 
-# 🤖 OpenAI client
+# 🔐 OpenAI
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# 🔐 Page token mapping
+PAGE_TOKENS = {
+    "1090689544121845": os.getenv("APEXCORE_AI"),
+    "122098392890004279": os.getenv("STORE_ONLINE_SHOP")
+}
 
-# 🏠 Test endpoint
-@app.get("/")
-def home():
-    return {"message": "AI chatbot ажиллаж байна"}
+# 🧠 Барааны мэдээлэл (түр MVP)
+PRODUCTS = {
+    "122098392890004279": [
+        {"name": "iPhone 15 Pro", "price": "5,000,000₮"},
+        {"name": "Samsung S23", "price": "3,500,000₮"},
+        {"name": "AirPods Pro", "price": "800,000₮"},
+        {"name": "Smart Watch", "price": "600,000₮"}
+    ]
+}
 
-
-# 🔐 Facebook webhook verify (GET)
+# 🔍 VERIFY ENDPOINT (Meta шалгах үед)
 @app.get("/webhook")
 async def verify(request: Request):
     hub_mode = request.query_params.get("hub.mode")
@@ -35,49 +41,75 @@ async def verify(request: Request):
     return PlainTextResponse("error", status_code=403)
 
 
-# 📩 Facebook message авах (POST)
+# 💬 MESSAGE RECEIVE
 @app.post("/webhook")
 async def webhook(req: Request):
     data = await req.json()
 
     if "entry" in data:
         for entry in data["entry"]:
+            page_id = entry["id"]  # 🔥 ЯМАР PAGE гэдгийг эндээс авна
+
             for messaging in entry["messaging"]:
                 sender_id = messaging["sender"]["id"]
 
                 if "message" in messaging:
                     user_text = messaging["message"].get("text", "")
 
-                    try:
-                        # 🤖 AI response
-                        response = client.chat.completions.create(
-                            model="gpt-4.1-mini",
-                            messages=[
-                                {
-                                    "role": "system",
-                                    "content": "You are a Mongolian sales assistant. Reply shortly, friendly, and help users choose products."
-                                },
-                                {
-                                    "role": "user",
-                                    "content": user_text
-                                }
-                            ]
-                        )
+                    # 🤖 AI + Product reply
+                    reply = generate_reply(page_id, user_text)
 
-                        reply = response.choices[0].message.content
-
-                    except Exception as e:
-                        print("OPENAI ERROR:", str(e))   # 👈 нэм
-                        reply = "Уучлаарай, AI хариу өгөхөд алдаа гарлаа."
-
-                    send_message(sender_id, reply)
+                    # 📤 Send message
+                    send_message(page_id, sender_id, reply)
 
     return "ok"
 
 
-# 📤 Facebook message илгээх
-def send_message(recipient_id, text):
-    url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
+# 🤖 AI + БАРАА ЛОГИК
+def generate_reply(page_id, user_text):
+    try:
+        product_list = PRODUCTS.get(page_id, [])
+
+        product_text = ""
+        if product_list:
+            product_text = "\n".join(
+                [f"- {p['name']} ({p['price']})" for p in product_list]
+            )
+
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""
+Та Монгол хэл дээр хариулдаг онлайн дэлгүүрийн борлуулалтын assistant.
+
+Бараанууд:
+{product_text}
+
+Хэрэглэгчид тусалж, товч, ойлгомжтой, найрсаг хариул.
+"""
+                },
+                {"role": "user", "content": user_text}
+            ]
+        )
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+        print("OPENAI ERROR:", str(e))
+        return "Уучлаарай, AI хариу өгөхөд алдаа гарлаа."
+
+
+# 📤 MESSAGE SEND
+def send_message(page_id, recipient_id, text):
+    token = PAGE_TOKENS.get(page_id)
+
+    if not token:
+        print("TOKEN NOT FOUND FOR PAGE:", page_id)
+        return
+
+    url = f"https://graph.facebook.com/v18.0/me/messages?access_token={token}"
 
     payload = {
         "recipient": {"id": recipient_id},
@@ -85,3 +117,9 @@ def send_message(recipient_id, text):
     }
 
     requests.post(url, json=payload)
+
+
+# 🧪 TEST
+@app.get("/")
+def home():
+    return {"message": "AI chatbot ажиллаж байна 🚀"}
