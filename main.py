@@ -1,14 +1,19 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 import requests
+import os
+from openai import OpenAI
 
 app = FastAPI()
 
-# 👉 Facebook page access token
+# 🔐 Facebook page token
 PAGE_ACCESS_TOKEN = "EAGBiyPUiZClABRDVkcofHw5Ia1IMaLuA9EzsvF8PZBFJRdiAZB1PXzfQXnfuhZArYhjr25zL9ok4GvgKpFUbNVSvjBNn2XBWdkY6nPeJ1nMrAUOqvPz8b3j92Bq9cwyeJZBNPB21cRXGCJGWZB4CXUGuROmiaj90RcUOzXgehRRLnFZA4oV0jjb0BLHKlvnCtXVqEjFcwZDZD"
 
-# 👉 Webhook verify token
+# 🔐 Webhook verify token
 VERIFY_TOKEN = "mytoken123"
+
+# 🤖 OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # 🏠 Test endpoint
@@ -43,15 +48,33 @@ async def webhook(req: Request):
                 if "message" in messaging:
                     user_text = messaging["message"].get("text", "")
 
-                    # 🤖 Одоохондоо echo reply
-                    reply = f"Та бичсэн: {user_text}"
+                    try:
+                        # 🤖 AI response
+                        response = client.chat.completions.create(
+                            model="gpt-4.1-mini",
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": "You are a Mongolian sales assistant. Reply shortly, friendly, and help users choose products."
+                                },
+                                {
+                                    "role": "user",
+                                    "content": user_text
+                                }
+                            ]
+                        )
+
+                        reply = response.choices[0].message.content
+
+                    except Exception as e:
+                        reply = "Уучлаарай, AI хариу өгөхөд алдаа гарлаа."
 
                     send_message(sender_id, reply)
 
     return "ok"
 
 
-# 📤 Message илгээх
+# 📤 Facebook message илгээх
 def send_message(recipient_id, text):
     url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
 
