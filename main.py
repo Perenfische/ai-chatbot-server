@@ -10,10 +10,15 @@ PAGE_ACCESS_TOKEN = "EAGBiyPUiZClABRDVkcofHw5Ia1IMaLuA9EzsvF8PZBFJRdiAZB1PXzfQXn
 def home():
     return {"message": "AI chatbot ажиллаж байна"}
 
+from fastapi import Request
+
 @app.get("/webhook")
-def verify(hub_mode: str = None, hub_challenge: str = None, hub_verify_token: str = None):
-    if hub_verify_token == "mytoken123":
-        return hub_challenge
+async def verify(request: Request):
+    params = request.query_params
+    
+    if params.get("hub.verify_token") == "mytoken123":
+        return params.get("hub.challenge")
+    
     return "error"
 
 @app.post("/webhook")
