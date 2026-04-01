@@ -3,32 +3,9 @@
     {
       "name": "RFID хамгаалалттай минимал түрийвч",
       "price": "49,000₮",
-      "image": "https://scontent.fuln2-2.fna.fbcdn.net/v/t39.30808-6/470661903_122250245726002231_3474219233265122996_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=13d280&_nc_ohc=BrRmalHLvqQQ7kNvwHr8-Mz&_nc_oc=Adq03B8HKOsvhsloBmSAJOC992P_KKCdWeU2iLeJJKTHkz4hMRbCUeufwSohgkbT38Q&_nc_zt=23&_nc_ht=scontent.fuln2-2.fna&_nc_gid=x0v-oAaT65Hy5EsxZV9WiQ&_nc_ss=7a3a8&oh=00_Af209ocluzMjHJmVOfNpxVLyWyuhV2oeHIILh-Vwy7KwVA&oe=69D2A253",
-      "description": "🔥 Минимал шинэ загварын түрийвч 🔥 Маш эвтэйхэн, технологи шингэсэн. 💰 Бэлэн мөнгө хийж болно. 💳 6 карт орно. 🛡 RFID хамгаалалттай.",
+      "image": "https://i.imgur.com/3yafW6E.jpg",
+      "description": "🔥 Минимал шинэ загварын түрийвч. 💰 Бэлэн мөнгө хийж болно. 💳 6 карт орно. 🛡 RFID хамгаалалттай.",
       "category": "pocket"
-    }
-  ]
-}
-    {
-      "name": "Samsung S23",
-      "price": "3,500,000₮",
-      "image": "https://images.samsung.com/s23.jpg",
-      "description": "Android flagship",
-      "category": "phone"
-    },
-    {
-      "name": "AirPods Pro",
-      "price": "800,000₮",
-      "image": "https://store.storeimages.cdn-apple.com/airpodspro.jpg",
-      "description": "Noise cancelling",
-      "category": "accessory"
-    },
-    {
-      "name": "Smart Watch",
-      "price": "600,000₮",
-      "image": "https://example.com/watch.jpg",
-      "description": "Fitness tracking",
-      "category": "wearable"
     }
   ]
 }
