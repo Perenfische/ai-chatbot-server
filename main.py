@@ -58,17 +58,17 @@ async def webhook(req: Request):
                     product_list = PRODUCTS.get(page_id, [])
 
                     # 🔍 PRODUCT MATCH
-                   matched = []
+                    matched = []
 
-                        for p in product_list:
-                            keywords = p["name"].lower().split()
+                    for p in product_list:
+                        keywords = p["name"].lower().split()
 
-                            for word in keywords:
-                                if word in user_text:
-                                    matched.append(p)
-                                    break
+                        for word in keywords:
+                            if word in user_text:
+                                matched.append(p)
+                                break
 
-                    # 🟢 Хэрвээ бараа олдвол зураг явуулна
+                    # 🟢 Product олдвол зураг явуулна
                     if matched:
                         for product in matched:
                             send_product(page_id, sender_id, product)
