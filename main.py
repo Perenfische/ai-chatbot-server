@@ -97,7 +97,7 @@ def generate_reply(page_id, user_text):
 
     except Exception as e:
         print("OPENAI ERROR:", str(e))
-        return "Алдаа гарлаа
+        return "Алдаа гарлаа"
 
 
 # 📤 MESSAGE SEND
